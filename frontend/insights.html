@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Insights - Churn Prediction</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'deep-blue': '#1e3a8a',
+                        'slate-gray': '#334155',
+                        'emerald': '#10b981',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glassmorphism {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+        .sidebar-link {
+            transition: all 0.3s ease;
+        }
+        .sidebar-link:hover {
+            background: rgba(16, 185, 129, 0.1);
+            border-left: 3px solid #10b981;
+            padding-left: 1.5rem;
+        }
+        .insight-card {
+            background: linear-gradient(135deg, rgba(30, 58, 138, 0.8), rgba(51, 65, 85, 0.8));
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .insight-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-900 via-purple-900 to-pink-900 min-h-screen">
+    <!-- Global chart variables to prevent recreation -->
+    <script>
+        let churnChart = null;
+        let segmentChart = null;
+        let featureChart = null;
+        let isChartsInitialized = false;
+    </script>
+    
+    <!-- Sidebar -->
+    <aside class="fixed left-0 top-0 h-full w-64 bg-slate-950 bg-opacity-90 backdrop-blur-lg border-r border-slate-800 z-50">
+        <div class="p-6">
+            <div class="flex items-center space-x-3 mb-8">
+                <div class="w-10 h-10 bg-emerald-500 rounded-lg flex items-center justify-center">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
+                </div>
+                <h1 class="text-xl font-bold text-white">Churn Predict</h1>
+            </div>
+            
+            <nav class="space-y-2">
+                <a href="index.html" class="sidebar-link flex items-center space-x-3 text-white hover:text-white p-3 rounded-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                    </svg>
+                    <span>Overview</span>
+                </a>
+                
+                <a href="index.html#prediction" class="sidebar-link flex items-center space-x-3 text-white hover:text-white p-3 rounded-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    <span>New Prediction</span>
+                </a>
+                
+                <a href="insights.html" class="sidebar-link flex items-center space-x-3 text-emerald-400 bg-emerald-500 bg-opacity-10 p-3 rounded-lg border-l-3 border-emerald-500">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
+                    <span>Customer Insights</span>
+                </a>
+                
+                <a href="index.html#strategy" class="sidebar-link flex items-center space-x-3 text-white hover:text-white p-3 rounded-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                    </svg>
+                    <span>Retention Strategy</span>
+                </a>
+            </nav>
+        </div>
+        
+        <div class="absolute bottom-0 left-0 right-0 p-6">
+            <div class="glassmorphism rounded-lg p-4">
+                <p class="text-sm text-white">Logged in as:</p>
+                <p class="text-sm text-emerald-400" id="userEmail">admin@churnpredict.com</p>
+                <button onclick="logout()" class="mt-2 text-xs text-red-400 hover:text-red-300">Sign Out</button>
+            </div>
+        </div>
+    </aside>
+    
+    <!-- Main Content -->
+    <main class="ml-64 p-8">
+        <!-- Header -->
+        <header class="mb-8">
+            <h2 class="text-3xl font-bold text-white mb-2">Customer Insights</h2>
+            <p class="text-white">Deep dive into customer behavior patterns and churn analytics</p>
+        </header>
+        
+        <!-- Key Metrics Overview -->
+        <section class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div id="avg-lifetime" class="insight-card rounded-xl p-6">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-white text-sm">Avg. Customer Lifetime</span>
+                    <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-2xl font-bold text-white">Loading...</h3>
+                <p class="text-xs text-emerald-400 mt-1">Loading...</p>
+            </div>
+            
+            <div id="revenue-risk" class="insight-card rounded-xl p-6">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-white text-sm">Revenue at Risk</span>
+                    <svg class="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-2xl font-bold text-white">Loading...</h3>
+                <p class="text-xs text-red-400 mt-1">Loading...</p>
+            </div>
+            
+            <div id="retention-rate" class="insight-card rounded-xl p-6">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-white text-sm">Retention Rate</span>
+                    <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-2xl font-bold text-white">Loading...</h3>
+                <p class="text-xs text-emerald-400 mt-1">Loading...</p>
+            </div>
+            
+            <div id="churn-reduction" class="insight-card rounded-xl p-6">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-white text-sm">Churn Reduction</span>
+                    <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"></path>
+                    </svg>
+                </div>
+                <h3 class="text-2xl font-bold text-white">Loading...</h3>
+                <p class="text-xs text-emerald-400 mt-1">Loading...</p>
+            </div>
+        </section>
+        
+        <!-- Charts Section -->
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Churn Trend Chart -->
+            <div class="glass-card rounded-2xl p-6">
+                <h3 class="text-xl font-semibold text-white mb-4">Churn Trend Analysis</h3>
+                <div style="position: relative; height: 280px; width: 100%;">
+                    <canvas id="churnTrendChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- Customer Segments -->
+            <div class="glass-card rounded-2xl p-6">
+                <h3 class="text-xl font-semibold text-white mb-4">Customer Segments</h3>
+                <div style="position: relative; height: 250px; width: 100%;">
+                    <canvas id="segmentChart"></canvas>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Risk Factors Analysis -->
+        <section class="glass-card rounded-2xl p-6 mb-8">
+            <h3 class="text-xl font-semibold text-white mb-6">Key Risk Factors</h3>
+            <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-3 h-3 bg-red-500 rounded-full"></div>
+                        <span class="text-white">Month-to-Month Contracts</span>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <div class="w-48 bg-gray-700 rounded-full h-2">
+                            <div class="bg-red-500 h-2 rounded-full" style="width: 78%"></div>
+                        </div>
+                        <span class="text-sm text-white font-semibold">78%</span>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-3 h-3 bg-orange-500 rounded-full"></div>
+                        <span class="text-white">High Monthly Charges</span>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <div class="w-48 bg-gray-700 rounded-full h-2">
+                            <div class="bg-orange-500 h-2 rounded-full" style="width: 65%"></div>
+                        </div>
+                        <span class="text-sm text-white font-semibold">65%</span>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                        <span class="text-white">Low Tenure (< 12 months)</span>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <div class="w-48 bg-gray-700 rounded-full h-2">
+                            <div class="bg-yellow-500 h-2 rounded-full" style="width: 52%"></div>
+                        </div>
+                        <span class="text-sm text-white font-semibold">52%</span>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                        <span class="text-white">No Tech Support</span>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <div class="w-48 bg-gray-700 rounded-full h-2">
+                            <div class="bg-blue-500 h-2 rounded-full" style="width: 43%"></div>
+                        </div>
+                        <span class="text-sm text-white font-semibold">43%</span>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-3 h-3 bg-purple-500 rounded-full"></div>
+                        <span class="text-white">Fiber Optic Service</span>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <div class="w-48 bg-gray-700 rounded-full h-2">
+                            <div class="bg-purple-500 h-2 rounded-full" style="width: 38%"></div>
+                        </div>
+                        <span class="text-sm text-white font-semibold">38%</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- High Risk Customers Table -->
+        <section class="glass-card rounded-2xl p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl font-semibold text-white">High Risk Customers</h3>
+                <button class="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm transition duration-300">
+                    Export Data
+                </button>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="border-b border-gray-700">
+                            <th class="pb-3 text-white text-sm font-medium">Customer ID</th>
+                            <th class="pb-3 text-white text-sm font-medium">Tenure</th>
+                            <th class="pb-3 text-white text-sm font-medium">Monthly Charges</th>
+                            <th class="pb-3 text-white text-sm font-medium">Contract</th>
+                            <th class="pb-3 text-white text-sm font-medium">Churn Probability</th>
+                            <th class="pb-3 text-white text-sm font-medium">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="high-risk-table">
+                        <!-- Data will be loaded dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+    
+    <script>
+        // Check login status
+        if (localStorage.getItem('isLoggedIn') !== 'true') {
+            window.location.href = 'login.html';
+        }
+        
+        // Display user email
+        const userEmail = localStorage.getItem('userEmail');
+        if (userEmail) {
+            document.getElementById('userEmail').textContent = userEmail;
+        }
+        
+        // Logout function
+        function logout() {
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('userEmail');
+            window.location.href = 'login.html';
+        }
+        
+        // Global chart variables are already declared in head section
+        
+        // Load real data for insights (now just calls loadMetrics)
+        async function loadInsightsData() {
+            try {
+                // Load dataset
+                const datasetResponse = await fetch("http://127.0.0.1:8000/dataset");
+                if (!datasetResponse.ok) {
+                    throw new Error('Failed to load dataset');
+                }
+                const datasetData = await datasetResponse.json();
+                const dataset = datasetData.dataset;
+                
+                // Compute metrics
+                const metrics = computeMetrics(dataset);
+                
+                // Update metric cards
+                updateMetricCards(metrics);
+                
+                // Update charts
+                updateCharts(metrics);
+                
+                // Load high-risk customers
+                const highRiskResponse = await fetch("http://127.0.0.1:8000/high-risk-customers");
+                if (highRiskResponse.ok) {
+                    const highRiskData = await highRiskResponse.json();
+                    if(highRiskData && highRiskData.high_risk_customers) {
+                       updateHighRiskTable(highRiskData.high_risk_customers);
+                    }
+                }
+                
+                // Load churn trend
+                const churnTrendResponse = await fetch("http://127.0.0.1:8000/churn-trend");
+                if (churnTrendResponse.ok) {
+                    const churnTrendData = await churnTrendResponse.json();
+                    updateChurnTrendChart(churnTrendData);
+                }
+                
+            } catch (err) {
+                console.error("Error loading insights data", err);
+                // Show error in metric cards
+                updateMetricCards({
+                    avgLifetime: 'Error',
+                    revenueAtRisk: 'Error',
+                    retentionRate: 'Error',
+                    churnReduction: 'Error'
+                });
+            }
+        }
+        
+        // Update churn trend chart with real data
+        function getCompactChurnTrendData(data) {
+            const maxPoints = 4;
+            const labels = data.labels || Array.from({length: 30}, (_, i) => `Customer ${i + 1}`);
+            const churnTrend = data.churn_trend || [];
+            if (labels.length <= maxPoints) {
+                return { labels, churn_trend: churnTrend };
+            }
+            const startIndex = Math.max(0, labels.length - maxPoints);
+            return {
+                labels: labels.slice(startIndex),
+                churn_trend: churnTrend.slice(startIndex)
+            };
+        }
+
+        function updateChurnTrendChart(data) {
+            const churnCtx = document.getElementById('churnTrendChart');
+            if (!churnCtx) return;
+            
+            const ctx = churnCtx.getContext('2d');
+            const normalized = {
+                labels: data.labels || data.trendLabels || [],
+                churn_trend: data.churn_trend || data.trend || []
+            };
+            const compactData = getCompactChurnTrendData(normalized);
+            
+            if (!churnChart) {
+                churnChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: compactData.labels,
+                        datasets: [{
+                            label: 'Churn Probability (%)',
+                            data: compactData.churn_trend,
+                            borderColor: '#ef4444',
+                            backgroundColor: 'rgba(239, 68, 68, 0.12)',
+                            borderWidth: 2.5,
+                            tension: 0.25,
+                            fill: true,
+                            pointRadius: 4,
+                            pointBackgroundColor: '#ef4444',
+                            pointBorderColor: '#ffffff',
+                            pointBorderWidth: 2,
+                            pointHoverRadius: 6,
+                            pointHoverBackgroundColor: '#ff6b6b'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        animation: {
+                            duration: 0
+                        },
+                        plugins: {
+                            legend: {
+                                display: true,
+                                labels: {
+                                    color: '#ffffff',
+                                    font: { size: 12 },
+                                    padding: 15
+                                }
+                            },
+                            tooltip: {
+                                enabled: true,
+                                mode: 'index',
+                                intersect: false,
+                                callbacks: {
+                                    label: function(context) {
+                                        return context.dataset.label + ': ' + context.formattedValue + '%';
+                                    }
+                                },
+                                backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                                padding: 8
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100,
+                                ticks: {
+                                    color: '#ffffff',
+                                    font: { size: 11 },
+                                    stepSize: 20,
+                                    callback: function(value) {
+                                        return value + '%';
+                                    }
+                                },
+                                grid: { color: 'rgba(255, 255, 255, 0.08)' }
+                            },
+                            x: {
+                                ticks: {
+                                    color: '#ffffff',
+                                    font: { size: 11 },
+                                    maxTicksLimit: 4,
+                                    autoSkip: true,
+                                    autoSkipPadding: 10
+                                },
+                                grid: { color: 'rgba(255, 255, 255, 0.05)' }
+                            }
+                        }
+                    }
+                });
+            } else {
+                churnChart.data.labels = compactData.labels;
+                churnChart.data.datasets[0].data = compactData.churn_trend;
+                churnChart.update('none');
+            }
+        }
+        
+        // Compute metrics from dataset
+        function computeMetrics(dataset) {
+            const totalCustomers = dataset.length;
+            const churnedCustomers = dataset.filter(customer => customer.Churn === 'Yes').length;
+            const retainedCustomers = totalCustomers - churnedCustomers;
+            
+            // Average customer lifetime (tenure for retained customers)
+            const retainedTenures = dataset.filter(customer => customer.Churn === 'No').map(customer => customer.tenure);
+            const avgLifetime = retainedTenures.length > 0 ? (retainedTenures.reduce((a, b) => a + b, 0) / retainedTenures.length).toFixed(1) : 0;
+            
+            // Revenue at risk (monthly charges of churned customers)
+            const revenueAtRisk = dataset.filter(customer => customer.Churn === 'Yes')
+                .reduce((sum, customer) => sum + customer.MonthlyCharges, 0).toFixed(2);
+            
+            // Retention rate
+            const retentionRate = totalCustomers > 0 ? ((retainedCustomers / totalCustomers) * 100).toFixed(1) : 0;
+            
+            // Churn reduction (simplified - could be year over year comparison)
+            const churnRate = totalCustomers > 0 ? ((churnedCustomers / totalCustomers) * 100).toFixed(1) : 0;
+            const churnReduction = (100 - parseFloat(churnRate)).toFixed(1); // Simplified
+            
+            // Customer segments
+            const segments = {
+                churned: churnedCustomers,
+                retained: retainedCustomers
+            };
+            
+            // Risk factors
+            const monthToMonth = dataset.filter(customer => customer.Contract === 'Month-to-month').length;
+            const monthToMonthChurn = dataset.filter(customer => customer.Contract === 'Month-to-month' && customer.Churn === 'Yes').length;
+            const monthToMonthRisk = monthToMonth > 0 ? ((monthToMonthChurn / monthToMonth) * 100).toFixed(0) : 0;
+            
+            return {
+                avgLifetime: avgLifetime,
+                revenueAtRisk: revenueAtRisk,
+                retentionRate: retentionRate,
+                churnReduction: churnReduction,
+                segments: segments,
+                riskFactors: {
+                    monthToMonthRisk: monthToMonthRisk
+                }
+            };
+        }
+        
+        // Update metric cards with computed values
+        function updateMetricCards(metrics) {
+            document.querySelector('#avg-lifetime h3').textContent = metrics.avgLifetime + ' months';
+            document.querySelector('#avg-lifetime p').textContent = 'Avg customer lifetime';
+            
+            document.querySelector('#revenue-risk h3').textContent = '₹' + parseFloat(metrics.revenueAtRisk).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            document.querySelector('#revenue-risk p').textContent = 'Revenue at risk';
+            
+            document.querySelector('#retention-rate h3').textContent = metrics.retentionRate + '%';
+            document.querySelector('#retention-rate p').textContent = 'Current retention rate';
+            
+            document.querySelector('#churn-reduction h3').textContent = metrics.churnReduction + '%';
+            document.querySelector('#churn-reduction p').textContent = 'Year over year improvement';
+        }
+        
+        // Update charts with computed data
+        function updateCharts(metrics) {
+            // Update Customer Segments Chart
+            const segmentCanvas = document.getElementById('segmentChart');
+            if (!segmentCanvas) return;
+            const segmentCtx = segmentCanvas.getContext('2d');
+            if (!segmentChart) {
+                segmentChart = new Chart(segmentCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Churned', 'Retained'],
+                        datasets: [{
+                            data: [metrics.segments.churned, metrics.segments.retained],
+                            backgroundColor: ['#ef4444', '#10b981'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    color: '#ffffff'
+                                }
+                            }
+                        }
+                    }
+                });
+            } else {
+                segmentChart.data.datasets[0].data = [metrics.segments.churned, metrics.segments.retained];
+                segmentChart.update('none');
+            }
+            
+            // Update risk factors
+            const riskFactorsContainer = document.querySelector('.space-y-4');
+            if (riskFactorsContainer) {
+                riskFactorsContainer.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-3 h-3 bg-red-500 rounded-full"></div>
+                            <span class="text-white">Month-to-Month Contracts</span>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <div class="w-48 bg-gray-700 rounded-full h-2">
+                                <div class="bg-red-500 h-2 rounded-full" style="width: ${metrics.riskFactors.monthToMonthRisk}%"></div>
+                            </div>
+                            <span class="text-sm text-white font-semibold">${metrics.riskFactors.monthToMonthRisk}%</span>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+        
+        // Update high-risk customers table with real data
+        function updateHighRiskTable(highRiskCustomers) {
+            const tableBody = document.querySelector('#high-risk-table');
+            if (!tableBody) return;
+            
+            // Clear existing rows
+            tableBody.innerHTML = '';
+            
+            if (!highRiskCustomers || highRiskCustomers.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="6" class="py-4 text-center text-gray-300">No high-risk customers found</td></tr>';
+                return;
+            }
+            
+            // Add new rows with real data
+            highRiskCustomers.forEach(customer => {
+                const row = document.createElement('tr');
+                row.className = 'border-b border-gray-800';
+                
+                // Risk level styling based on churn probability
+                let riskClass;
+                const prob = customer.ChurnProbability;
+                if (prob > 0.8) {
+                    riskClass = 'text-red-400';
+                } else if (prob > 0.7) {
+                    riskClass = 'text-orange-400';
+                } else {
+                    riskClass = 'text-yellow-400';
+                }
+                
+                row.innerHTML = `
+                    <td class="py-3 text-white">${customer.customerID || ''}</td>
+                    <td class="py-3 text-white">${customer.tenure || 0} months</td>
+                    <td class="py-3 text-white">₹${Number(customer.MonthlyCharges || 0).toFixed(2)}</td>
+                    <td class="py-3">
+                        <span class="px-2 py-1 bg-red-500 bg-opacity-20 text-red-400 rounded text-xs">${customer.Contract || ''}</span>
+                    </td>
+                    <td class="py-3"><span class="${riskClass} font-semibold">${Number(customer.ChurnProbability || 0).toFixed(1)}%</span></td>
+                    <td class="py-3">
+                        <button class="bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-1 rounded text-xs transition">Contact</button>
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+        
+        // Load data on page load
+        // Only call once to prevent repeated chart redraws
+        loadInsightsData();
+        
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 p-4 rounded-lg ${type === 'error' ? 'bg-red-500' : 'bg-emerald-500'} text-white z-50 transform transition-all duration-300 translate-x-full`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.classList.remove('translate-x-full');
+            }, 100);
+            
+            setTimeout(() => {
+                notification.classList.add('translate-x-full');
+                setTimeout(() => {
+                    notification.remove();
+                }, 300);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

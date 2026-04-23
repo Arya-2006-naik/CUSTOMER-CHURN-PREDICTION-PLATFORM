@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Overview - Customer Churn Prediction</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'white': '#1e3a8a',
+                        'slate-gray': '#334155',
+                        'emerald': '#10b981',
+                        'glass': 'rgba(255, 255, 255, 0.1)',
+                    },
+                    backdropBlur: {
+                        xs: '2px',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        h1, h2, h3, h4, h5, h6 {
+            color: white !important;
+        }
+        label {
+            color: white !important;
+        }
+        p {
+            color: white !important;
+        }
+        span {
+            color: white !important;
+        }
+        li {
+            color: white !important;
+        }
+        
+        /* Preserve colored elements */
+        .text-red-400, .text-red-300 {
+            color: #f87171 !important;
+        }
+        .text-yellow-400 {
+            color: #facc15 !important;
+        }
+        .text-emerald-400, .text-emerald-500 {
+            color: #34d399 !important;
+        }
+        .text-blue-400 {
+            color: #60a5fa !important;
+        }
+        .text-orange-400 {
+            color: #fb923c !important;
+        }
+        .text-purple-400 {
+            color: #a78bfa !important;
+        }
+        
+        .glassmorphism {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .glass-card {
+            background: #2E5090;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+        .sidebar-link {
+            transition: all 0.3s ease;
+        }
+        .sidebar-link:hover {
+            background: rgba(16, 185, 129, 0.1);
+            border-left: 3px solid #10b981;
+            padding-left: 1.5rem;
+        }
+        .kpi-card {
+            background: linear-gradient(135deg, rgba(30, 58, 138, 0.8), rgba(51, 65, 85, 0.8));
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .kpi-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 min-h-screen text-white">
+    
+    <!-- Sidebar -->
+    <aside class="fixed left-0 top-0 h-full w-64 bg-slate-950 bg-opacity-90 backdrop-blur-lg border-r border-slate-800 z-50">
+        <div class="p-6">
+            <div class="flex items-center space-x-3 mb-8">
+                <div class="w-10 h-10 bg-emerald-500 rounded-lg flex items-center justify-center">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
+                </div>
+                <h1 class="text-xl font-bold text-white">Churn Predict</h1>
+            </div>
+            
+            <nav class="space-y-2">
+                <a href="overview.html" class="sidebar-link flex items-center space-x-3 text-emerald-400 bg-emerald-500 bg-opacity-10 p-3 rounded-lg border-l-3 border-emerald-500">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                    </svg>
+                    <span class="text-white">Overview</span>
+                </a>
+                
+                <a href="index.html#prediction" class="sidebar-link flex items-center space-x-3 text-white hover:text-white p-3 rounded-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    <span class="text-white">New Prediction</span>
+                </a>
+                
+                <a href="insights.html" class="sidebar-link flex items-center space-x-3 text-white hover:text-white p-3 rounded-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
+                    <span class="text-white">Customer Insights</span>
+                </a>
+                
+                <a href="retention-strategy.html" class="sidebar-link flex items-center space-x-3 text-white hover:text-white p-3 rounded-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                    </svg>
+                    <span class="text-white">Retention Strategy</span>
+                </a>
+            </nav>
+        </div>
+        
+        <div class="absolute bottom-0 left-0 right-0 p-6">
+            <div class="glassmorphism rounded-lg p-4">
+                <p class="text-sm text-white">Logged in as:</p>
+                <p class="text-sm text-emerald-400" id="userEmail">admin@churnpredict.com</p>
+                <button onclick="logout()" class="mt-2 text-xs text-red-400 hover:text-red-300">Sign Out</button>
+            </div>
+        </div>
+    </aside>
+    
+    <!-- Main Content -->
+    <main class="ml-64 p-8">
+        <!-- Header -->
+        <header class="mb-8">
+            <h2 class="text-3xl font-bold text-white mb-2">Overview Dashboard</h2>
+            <p class="text-white">Monitor key metrics and customer churn indicators</p>
+        </header>
+        
+        <!-- Top Metric Cards -->
+        <section class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <!-- Total Customers -->
+            <div class="kpi-card rounded-xl p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-12 h-12 bg-blue-500 bg-opacity-20 rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <h3 id="totalCustomersMetric" class="text-3xl font-bold text-white mb-1">0</h3>
+                <p class="text-white text-sm">Total Customers</p>
+            </div>
+            
+            <!-- Churn Rate -->
+            <div class="kpi-card rounded-xl p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-12 h-12 bg-yellow-500 bg-opacity-20 rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <h3 id="churnRateMetric" class="text-3xl font-bold text-white mb-1">0%</h3>
+                <p class="text-white text-sm">Churn Rate</p>
+            </div>
+            
+            <!-- High Risk Customers -->
+            <div class="kpi-card rounded-xl p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-12 h-12 bg-red-500 bg-opacity-20 rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <h3 id="highRiskMetric" class="text-3xl font-bold text-white mb-1">0</h3>
+                <p class="text-white text-sm">High Risk Customers</p>
+            </div>
+            
+            <!-- Avg Monthly Charges -->
+            <div class="kpi-card rounded-xl p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-12 h-12 bg-emerald-500 bg-opacity-20 rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <h3 id="avgChargesMetric" class="text-3xl font-bold text-white mb-1">₹0</h3>
+                <p class="text-white text-sm">Avg Monthly Charges</p>
+            </div>
+        </section>
+        
+
+    </main>
+    
+    <script>
+        // Check login status
+        if (localStorage.getItem('isLoggedIn') !== 'true') {
+            window.location.href = 'login.html';
+        }
+        
+        // Display user email
+        const userEmail = localStorage.getItem('userEmail');
+        if (userEmail) {
+            document.getElementById('userEmail').textContent = userEmail;
+        }
+        
+        function logout() {
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('userEmail');
+            window.location.href = 'login.html';
+        }
+        
+
+        
+        async function loadDashboardData() {
+            try {
+                // Load overview data
+                const overviewResponse = await fetch('http://127.0.0.1:8000/overview');
+                if (!overviewResponse.ok) throw new Error('Failed to load overview');
+                const overviewData = await overviewResponse.json();
+                
+                // Update metric cards
+                document.getElementById('totalCustomersMetric').textContent = overviewData.total_customers.toLocaleString();
+                document.getElementById('churnRateMetric').textContent = overviewData.churn_rate.toFixed(1) + '%';
+                document.getElementById('avgChargesMetric').textContent = '₹' + overviewData.avg_monthly_charges.toLocaleString('en-IN', {maximumFractionDigits: 0});
+                
+                // Load high-risk customers to get count
+                const highRiskResponse = await fetch('http://127.0.0.1:8000/high-risk-customers');
+                if (highRiskResponse.ok) {
+                    const highRiskData = await highRiskResponse.json();
+                    document.getElementById('highRiskMetric').textContent = highRiskData.total_count || (highRiskData.high_risk_customers ? highRiskData.high_risk_customers.length : 0);
+                }
+
+                
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+        }
+
+        
+        // Load data on page load
+        loadDashboardData();
+        // Refresh every 10 seconds
+        setInterval(loadDashboardData, 10000);
+    </script>
+</body>
+</html>

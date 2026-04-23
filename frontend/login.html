@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Customer Churn Prediction</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'deep-blue': '#1e3a8a',
+                        'slate-gray': '#334155',
+                        'emerald': '#10b981',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glassmorphism {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .animated-bg {
+            background: linear-gradient(-45deg, #1e3a8a, #334155, #1e293b, #0f172a);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+        }
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .float-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+    </style>
+</head>
+<body class="animated-bg min-h-screen flex items-center justify-center text-white">
+    
+    <!-- Background Elements -->
+    <div class="absolute inset-0 overflow-hidden">
+        <div class="absolute top-20 left-20 w-72 h-72 bg-emerald-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 float-animation"></div>
+        <div class="absolute bottom-20 right-20 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 float-animation" style="animation-delay: 2s;"></div>
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 float-animation" style="animation-delay: 4s;"></div>
+    </div>
+        <!-- Login Container -->
+    <div class="relative z-10 w-full max-w-md px-6">
+        <!-- Logo Section -->
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center w-20 h-20 bg-emerald-500 rounded-2xl mb-4 shadow-2xl">
+                <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                </svg>
+            </div>
+            <h1 class="text-3xl font-bold text-white mb-2">Churn Predict</h1>
+            <p class="text-gray-300">Customer Churn Prediction Platform</p>
+        </div>
+        
+        <!-- Toggle Buttons -->
+        <div class="flex mb-6 bg-white bg-opacity-10 rounded-lg p-1">
+            <button id="signinTab" onclick="toggleForm('signin')" class="flex-1 py-2 px-4 rounded-md bg-emerald-500 text-white font-medium transition duration-300">
+                Sign In
+            </button>
+            <button id="signupTab" onclick="toggleForm('signup')" class="flex-1 py-2 px-4 rounded-md text-gray-300 hover:text-white font-medium transition duration-300">
+                Sign Up
+            </button>
+        </div>
+        
+        <!-- Sign In Form -->
+        <div id="signinForm" class="glassmorphism rounded-2xl p-8 shadow-2xl">
+            <h2 class="text-2xl font-semibold text-white mb-6">Welcome Back</h2>
+            
+            <form id="loginForm" class="space-y-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"></path>
+                            </svg>
+                        </div>
+                        <input type="email" id="signinEmail" required class="w-full pl-10 pr-3 py-3 bg-white bg-opacity-10 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 focus:ring-opacity-20" placeholder="admin@churnpredict.com">
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Password</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                            </svg>
+                        </div>
+                        <input type="password" id="signinPassword" required class="w-full pl-10 pr-10 py-3 bg-white bg-opacity-10 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 focus:ring-opacity-20" placeholder="••••••••">
+                        <button type="button" onclick="togglePassword('signinPassword')" class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                            <svg id="signinPasswordToggle" class="h-5 w-5 text-gray-400 hover:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input id="remember" type="checkbox" class="w-4 h-4 bg-gray-700 border-gray-600 rounded focus:ring-emerald-500 focus:ring-2">
+                        <label for="remember" class="ml-2 text-sm text-gray-300">Remember me</label>
+                    </div>
+                    <a href="#" onclick="showForgotPassword()" class="text-sm text-emerald-400 hover:text-emerald-300 transition">Forgot password?</a>
+                </div>
+                
+                <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-3 px-4 rounded-lg transition duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-opacity-20">
+                    Sign In
+                </button>
+            </form>
+        </div>
+        
+        <!-- Sign Up Form -->
+        <div id="signupForm" class="glassmorphism rounded-2xl p-8 shadow-2xl hidden">
+            <h2 class="text-2xl font-semibold text-white mb-6">Create Account</h2>
+            
+            <form id="registerForm" class="space-y-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Full Name</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                            </svg>
+                        </div>
+                        <input type="text" id="signupName" required class="w-full pl-10 pr-3 py-3 bg-white bg-opacity-10 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 focus:ring-opacity-20" placeholder="John Doe">
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"></path>
+                            </svg>
+                        </div>
+                        <input type="email" id="signupEmail" required class="w-full pl-10 pr-3 py-3 bg-white bg-opacity-10 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 focus:ring-opacity-20" placeholder="john@example.com">
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Password</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                            </svg>
+                        </div>
+                        <input type="password" id="signupPassword" required onkeyup="checkPasswordStrength()" class="w-full pl-10 pr-10 py-3 bg-white bg-opacity-10 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 focus:ring-opacity-20" placeholder="Create a strong password">
+                        <button type="button" onclick="togglePassword('signupPassword')" class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                            <svg id="signupPasswordToggle" class="h-5 w-5 text-gray-400 hover:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <div id="passwordStrength" class="mt-2">
+                        <div class="flex items-center space-x-2">
+                            <div class="flex-1 bg-gray-700 rounded-full h-2">
+                                <div id="strengthBar" class="h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                            </div>
+                            <span id="strengthText" class="text-xs text-gray-400">Password strength</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Confirm Password</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <input type="password" id="confirmPassword" required class="w-full pl-10 pr-3 py-3 bg-white bg-opacity-10 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 focus:ring-opacity-20" placeholder="Confirm your password">
+                    </div>
+                    <p id="passwordMatch" class="mt-1 text-xs text-gray-400">Passwords must match</p>
+                </div>
+                
+                <div class="flex items-center">
+                    <input id="terms" type="checkbox" required class="w-4 h-4 bg-gray-700 border-gray-600 rounded focus:ring-emerald-500 focus:ring-2">
+                    <label for="terms" class="ml-2 text-sm text-gray-300">I agree to the <a href="#" class="text-emerald-400 hover:text-emerald-300">Terms & Conditions</a></label>
+                </div>
+                
+                <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-3 px-4 rounded-lg transition duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-opacity-20">
+                    Create Account
+                </button>
+            </form>
+        </div>
+        
+        <!-- Demo Account Info -->
+        <div class="mt-6 p-4 bg-emerald-500 bg-opacity-10 border border-emerald-500 border-opacity-30 rounded-lg">
+            <p class="text-sm text-emerald-400 mb-1">Demo Account:</p>
+            <p class="text-xs text-gray-300">Email: admin@churnpredict.com</p>
+            <p class="text-xs text-gray-300">Password: demo123</p>
+        </div>
+        
+        <!-- Footer -->
+        <div class="text-center mt-8 text-gray-400 text-sm">
+            <p>© 2024 Churn Predict. All rights reserved.</p>
+        </div>
+    </div>
+    
+    <script>
+        // Toggle between sign in and sign up forms
+        function toggleForm(formType) {
+            const signinForm = document.getElementById('signinForm');
+            const signupForm = document.getElementById('signupForm');
+            const signinTab = document.getElementById('signinTab');
+            const signupTab = document.getElementById('signupTab');
+            
+            if (formType === 'signin') {
+                signinForm.classList.remove('hidden');
+                signupForm.classList.add('hidden');
+                signinTab.classList.add('bg-emerald-500', 'text-white');
+                signinTab.classList.remove('text-gray-300');
+                signupTab.classList.remove('bg-emerald-500', 'text-white');
+                signupTab.classList.add('text-gray-300');
+            } else {
+                signinForm.classList.add('hidden');
+                signupForm.classList.remove('hidden');
+                signupTab.classList.add('bg-emerald-500', 'text-white');
+                signupTab.classList.remove('text-gray-300');
+                signinTab.classList.remove('bg-emerald-500', 'text-white');
+                signinTab.classList.add('text-gray-300');
+            }
+        }
+        
+        // Toggle password visibility
+        function togglePassword(fieldId) {
+            const field = document.getElementById(fieldId);
+            const toggle = document.getElementById(fieldId + 'Toggle');
+            
+            if (field.type === 'password') {
+                field.type = 'text';
+                toggle.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>';
+            } else {
+                field.type = 'password';
+                toggle.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>';
+            }
+        }
+        
+        // Check password strength
+        function checkPasswordStrength() {
+            const password = document.getElementById('signupPassword').value;
+            const strengthBar = document.getElementById('strengthBar');
+            const strengthText = document.getElementById('strengthText');
+            
+            let strength = 0;
+            
+            if (password.length >= 8) strength += 25;
+            if (password.length >= 12) strength += 25;
+            if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength += 25;
+            if (/[0-9]/.test(password)) strength += 12.5;
+            if (/[^a-zA-Z0-9]/.test(password)) strength += 12.5;
+            
+            strengthBar.style.width = strength + '%';
+            
+            if (strength <= 25) {
+                strengthBar.className = 'h-2 rounded-full transition-all duration-300 bg-red-500';
+                strengthText.textContent = 'Weak';
+                strengthText.className = 'text-xs text-red-400';
+            } else if (strength <= 50) {
+                strengthBar.className = 'h-2 rounded-full transition-all duration-300 bg-orange-500';
+                strengthText.textContent = 'Fair';
+                strengthText.className = 'text-xs text-orange-400';
+            } else if (strength <= 75) {
+                strengthBar.className = 'h-2 rounded-full transition-all duration-300 bg-yellow-500';
+                strengthText.textContent = 'Good';
+                strengthText.className = 'text-xs text-yellow-400';
+            } else {
+                strengthBar.className = 'h-2 rounded-full transition-all duration-300 bg-emerald-500';
+                strengthText.textContent = 'Strong';
+                strengthText.className = 'text-xs text-emerald-400';
+            }
+            
+            checkPasswordMatch();
+        }
+        
+        // Check if passwords match
+        function checkPasswordMatch() {
+            const password = document.getElementById('signupPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const matchText = document.getElementById('passwordMatch');
+            
+            if (confirmPassword === '') {
+                matchText.textContent = 'Passwords must match';
+                matchText.className = 'mt-1 text-xs text-gray-400';
+            } else if (password === confirmPassword) {
+                matchText.textContent = 'Passwords match!';
+                matchText.className = 'mt-1 text-xs text-emerald-400';
+            } else {
+                matchText.textContent = 'Passwords do not match';
+                matchText.className = 'mt-1 text-xs text-red-400';
+            }
+        }
+        
+        // Show forgot password modal
+        function showForgotPassword() {
+            showNotification('Password reset link sent to your email!', 'success');
+        }
+        
+        // Show notification
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 p-4 rounded-lg ${type === 'success' ? 'bg-emerald-500' : 'bg-red-500'} text-white z-50 transform transition-all duration-300 translate-x-full`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.classList.remove('translate-x-full');
+            }, 100);
+            
+            setTimeout(() => {
+                notification.classList.add('translate-x-full');
+                setTimeout(() => {
+                    notification.remove();
+                }, 300);
+            }, 3000);
+        }
+        
+        // Login form submission
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('signinEmail').value;
+            const password = document.getElementById('signinPassword').value;
+            
+            // Check for demo account or registered users
+            const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+            const user = registeredUsers.find(u => u.email === email && u.password === password);
+            
+            if ((email === 'admin@churnpredict.com' && password === 'demo123') || user) {
+                localStorage.setItem('isLoggedIn', 'true');
+                localStorage.setItem('userEmail', email);
+                localStorage.setItem('userName', user ? user.name : 'Admin');
+                
+                showNotification('Login successful! Redirecting...', 'success');
+                
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 1500);
+            } else {
+                showNotification('Invalid credentials. Please try again.', 'error');
+            }
+        });
+        
+        // Sign up form submission
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('signupName').value;
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const terms = document.getElementById('terms').checked;
+            
+            // Validation
+            if (password !== confirmPassword) {
+                showNotification('Passwords do not match!', 'error');
+                return;
+            }
+            
+            if (password.length < 8) {
+                showNotification('Password must be at least 8 characters long!', 'error');
+                return;
+            }
+            
+            if (!terms) {
+                showNotification('Please accept the terms and conditions!', 'error');
+                return;
+            }
+            
+            // Get existing users
+            const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+            
+            // Check if email already exists
+            if (registeredUsers.find(u => u.email === email)) {
+                showNotification('Email already registered!', 'error');
+                return;
+            }
+            
+            // Add new user
+            registeredUsers.push({ name, email, password });
+            localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
+            
+            showNotification('Account created successfully! Please sign in.', 'success');
+            
+            // Switch to sign in form
+            setTimeout(() => {
+                toggleForm('signin');
+                // Clear form
+                document.getElementById('registerForm').reset();
+                document.getElementById('strengthBar').style.width = '0%';
+                document.getElementById('strengthText').textContent = 'Password strength';
+                document.getElementById('strengthText').className = 'text-xs text-gray-400';
+                document.getElementById('passwordMatch').textContent = 'Passwords must match';
+                document.getElementById('passwordMatch').className = 'mt-1 text-xs text-gray-400';
+            }, 1500);
+        });
+        
+        // Add event listener for confirm password
+        document.getElementById('confirmPassword').addEventListener('input', checkPasswordMatch);
+        
+        // Check if already logged in
+        if (localStorage.getItem('isLoggedIn') === 'true') {
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>

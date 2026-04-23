@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retention Strategy - Churn Prediction</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'deep-blue': '#1e3a8a',
+                        'slate-gray': '#334155',
+                        'emerald': '#10b981',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #1e3a8a 0%, #4c1d95 50%, #ec4899 100%);
+            font-family: 'Inter', sans-serif;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 1rem;
+        }
+        .strategy-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        .strategy-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        .action-button {
+            background: #10b981;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        .action-button:hover {
+            background: #059669;
+            transform: scale(1.05);
+        }
+        .risk-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .risk-high { background: #ef4444; color: white; }
+        .risk-medium { background: #f59e0b; color: white; }
+        .risk-low { background: #10b981; color: white; }
+        .toast {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            background: rgba(16, 185, 129, 0.95);
+            color: white;
+            padding: 1rem 1.25rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            z-index: 50;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.25s ease, transform 0.25s ease;
+            pointer-events: none;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+    </style>
+</head>
+<body class="min-h-screen p-8">
+    <!-- Header -->
+    <header class="mb-8">
+        <div class="max-w-7xl mx-auto">
+            <h1 class="text-3xl font-bold text-white mb-2">Customer Retention Strategy</h1>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto">
+        <!-- Strategy Cards -->
+        <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="strategy-cards">
+            <!-- Cards will be populated by JavaScript -->
+        </section>
+    </main>
+
+    <!-- Navigation -->
+    <nav class="fixed bottom-8 left-0 right-0 bg-slate-900 bg-opacity-90 backdrop-blur-lg p-4">
+        <div class="max-w-7xl mx-auto flex justify-between">
+            <a href="index.html" class="text-emerald-400 hover:text-emerald-300 transition-colors">
+                ← Back to Dashboard
+            </a>
+            <a href="insights.html" class="text-emerald-400 hover:text-emerald-300 transition-colors">
+                Insights →
+            </a>
+        </div>
+    </nav>
+
+    <script>
+        // Global variables
+        let strategies = [];
+
+        // Check login status
+        if (localStorage.getItem('isLoggedIn') !== 'true') {
+            window.location.href = 'index.html';
+        }
+
+        // Load retention strategies
+        async function loadRetentionStrategies() {
+            // Define strategies based on churn risk levels
+            strategies = [
+                {
+                    risk_level: 'High Risk',
+                    probability_range: '> 0.7',
+                    customer_count: 'High churn probability customers',
+                    recommendations: [
+                        'Offer discount',
+                        'Personal call from support',
+                        'Loyalty program enrollment'
+                    ]
+                },
+                {
+                    risk_level: 'Medium Risk',
+                    probability_range: '0.4 - 0.7',
+                    customer_count: 'Medium churn probability customers',
+                    recommendations: [
+                        'Send promotional email',
+                        'Offer upgrade',
+                        'Customer feedback survey'
+                    ]
+                },
+                {
+                    risk_level: 'Low Risk',
+                    probability_range: '< 0.4',
+                    customer_count: 'Low churn probability customers',
+                    recommendations: [
+                        'Thank you message',
+                        'Recommend add-on services'
+                    ]
+                }
+            ];
+            
+            // Update strategy cards
+            updateStrategyCards();
+        }
+
+        // Update strategy cards
+        function updateStrategyCards() {
+            const container = document.getElementById('strategy-cards');
+            container.innerHTML = '';
+            
+            strategies.forEach((strategy, index) => {
+                let riskClass, riskColor;
+                if (strategy.risk_level === 'High Risk') {
+                    riskClass = 'risk-high';
+                    riskColor = 'border-red-500 bg-red-500';
+                } else if (strategy.risk_level === 'Medium Risk') {
+                    riskClass = 'risk-medium';
+                    riskColor = 'border-yellow-500 bg-yellow-500';
+                } else {
+                    riskClass = 'risk-low';
+                    riskColor = 'border-green-500 bg-green-500';
+                }
+                
+                const card = document.createElement('div');
+                card.className = 'strategy-card rounded-xl p-6 border-2';
+                card.innerHTML = `
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-12 h-12 ${riskColor} bg-opacity-20 rounded-lg flex items-center justify-center">
+                                <span class="text-white font-bold text-lg">${strategy.risk_level.split(' ')[0][0]}</span>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-semibold text-white">${strategy.risk_level}</h3>
+                                <p class="text-white text-sm opacity-80">Churn Probability: ${strategy.probability_range}</p>
+                            </div>
+                        </div>
+                        <span class="risk-badge ${riskClass}">${strategy.risk_level}</span>
+                    </div>
+                    <div class="mb-4">
+                        <h4 class="text-lg font-medium text-white mb-3">Retention Strategies:</h4>
+                        <ul class="space-y-2">
+                            ${strategy.recommendations.map(rec => `<li class="flex items-center space-x-2">
+                                <span class="w-2 h-2 bg-emerald-500 rounded-full"></span>
+                                <span class="text-white">${rec}</span>
+                            </li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            });
+        }
+
+        // Execute action
+        // Load data on page load
+        loadRetentionStrategies();
+    </script>
+</body>
+</html>
