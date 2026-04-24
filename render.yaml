@@ -2,4 +2,4 @@ services:
   - type: web
     name: customer-churn-platform
     runtime: docker
-    dockerfilePath: ./Dockerfile
+    dockerfilePath: Dockerfile
