@@ -50,8 +50,10 @@ except Exception as e:
 
 # ---------------- LOAD MODEL ----------------
 try:
-    BASE_MODEL = joblib.load("churn_model.pkl")
-except:
+    model_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "churn_model.pkl")
+    BASE_MODEL = joblib.load(model_path)
+except Exception as e:
+    print(f"Model loading failed: {e}")
     BASE_MODEL = None
 
 ENHANCED_MODEL = GradientBoostingClassifier()
